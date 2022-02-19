@@ -82,35 +82,35 @@ def get_readable_time(seconds: int) -> str:
 
 PM_START_TEXT = """
 *𝙷𝙴𝙻𝙻𝙾  {} !*
-✪ 𝙸'𝙼 𝙰𝙽 𝙰𝙽𝙸𝙼𝙴 𝚃𝙷𝙴𝙼𝙴 𝙼𝙰𝙽𝙰𝙶𝙴𝙼𝙴𝙽𝚃 𝙱𝙾𝚃 [✨](https://te.legra.ph/file/fc82c0ca3978c217c48c9.jpg)
-────────────────────────
+✪ 𝙸'𝙼 𝙰𝙽 𝙰𝙽𝙸𝙼𝙴 𝚃𝙷𝙴𝙼𝙴 𝙼𝙰𝙽𝙰𝙶𝙴𝙼𝙴𝙽𝚃 𝙱𝙾𝚃 [✨](https://te.legra.ph/file/eae79198d81cb601b64a0.jpg)
+──────────────────────
 × *𝚄𝙿𝚃𝙸𝙼𝙴 ✘* `{}`
 × `{}` *𝚄𝚂𝙴𝚁𝚂, 𝙰𝙲𝚁𝙾𝚂𝚂* `{}` *𝙲𝙷𝙰𝚃𝚂*
-────────────────────────
+──────────────────────
 ✪ 𝙷𝙸𝚃 𝙷𝙴𝙻𝙿 𝚃𝙾 𝚂𝙴𝙴 𝙼𝚈 𝙰𝚅𝙰𝙸𝙻𝙰𝙱𝙻𝙴 𝙲𝙾𝙼𝙼𝙰𝙽𝙳𝚂
 """
 
 buttons = [
     [
-        InlineKeyboardButton(text="ᴀʙᴏᴜᴛ ᴠᴇɴᴏᴍ ʀᴏʙᴏᴛ", callback_data="siesta_"),
+        InlineKeyboardButton(text="✨𝐀ʙᴏᴜᴛ 𝐕ᴇɴᴏᴍ 𝐑ᴏʙᴏᴛ✨", callback_data="siesta_"),
     ],
     [
-        InlineKeyboardButton(text="ʜᴇʟᴘ", callback_data="help_back"),
+        InlineKeyboardButton(text="👑𝐇ᴇʟᴘ", callback_data="help_back"),
         InlineKeyboardButton(
-            text="ɪɴʟɪɴᴇ​​", switch_inline_query_current_chat=""
+            text="💫𝐈ɴʟɪɴᴇ​​", switch_inline_query_current_chat=""
         ),
     ],
     [
         InlineKeyboardButton(
-            text="ᴀᴅᴅ ᴠᴇɴᴏᴍ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ", url="t.me/GOD_VENOM_ROBOT?startgroup=new"),
+            text="🗯️𝐀ᴅᴅ 𝐕ᴇɴᴏᴍ 𝐓ᴏ 𝐘ᴏᴜʀ 𝐆ʀᴏᴜᴘ", url="t.me/GOD_VENOM_ROBOT?startgroup=new"),
     ],
 ]
 
 
 HELP_STRINGS = """
-✪ [𝙲𝙻𝙸𝙲𝙺](https://te.legra.ph/file/fc82c0ca3978c217c48c9.jpg) 𝙾𝙽 𝚃𝙷𝙴 𝙱𝚄𝚃𝚃𝙾𝙽 𝙱𝙴𝙻𝙻𝙾𝚆 𝚃𝙾 𝙶𝙴𝚃 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽 𝙰𝙱𝙾𝚄𝚃 𝚂𝙿𝙴𝙲𝙸𝙵𝙸𝙲𝚂 𝙲𝙾𝙼𝙼𝙰𝙽𝙳"""
+✪ [𝙲𝙻𝙸𝙲𝙺](https://te.legra.ph/file/eae79198d81cb601b64a0.jpg) 𝙾𝙽 𝚃𝙷𝙴 𝙱𝚄𝚃𝚃𝙾𝙽 𝙱𝙴𝙻𝙻𝙾𝚆 𝚃𝙾 𝙶𝙴𝚃 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽 𝙰𝙱𝙾𝚄𝚃 𝚂𝙿𝙴𝙲𝙸𝙵𝙸𝙲𝚂 𝙲𝙾𝙼𝙼𝙰𝙽𝙳"""
 
-EMI_IMG = "https://te.legra.ph/file/fc82c0ca3978c217c48c9.jpg"
+EMI_IMG = "https://te.legra.ph/file/eae79198d81cb601b64a0.jpg"
 
 DONATE_STRING = """ʜᴏɪɪ ᴍᴇ [ʀᴏʏᴀʟ ᴋɪɴɢ](https://t.me/BHAGAT_MAHAKAL_KA)"""
 
@@ -226,7 +226,7 @@ def start(update: Update, context: CallbackContext):
             )
     else:
         update.effective_message.reply_text(
-            f"<b>Hi I'm Siesta Robot!</b>\n<b>Started working since:</b> <code>{uptime}</code>",
+            f"<b>💫𝐇ɪ 𝐈'ᴍ 𝐕ᴇɴᴏᴍ 𝐑ᴏʙᴏᴛ💫</b>\n<b>✨𝐒ᴛᴀʀᴛᴇᴅ 𝐖ᴏʀᴋɪɴɢ 𝐒ɪɴᴄᴇ✨</b> <code>{uptime}</code>",
             parse_mode=ParseMode.HTML
        )
 
