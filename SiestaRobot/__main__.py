@@ -347,7 +347,7 @@ def help_button(update, context):
 @run_async
 def noi_about_callback(update, context):
     query = update.callback_query
-    if query.data == "siesta_":
+    if query.data == "Siesta_":
         query.message.edit_text(
             text= "❍ Hey this is my music commands you can use in your group. \n\n❍ **POWERD BY NOINOI MUSIC**",
             parse_mode=ParseMode.MARKDOWN,
