@@ -372,7 +372,7 @@ def Siesta_about_callback(update, context):
             
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Theame", callback_data="Siesta_theame"),InlineKeyboardButton("Server", callback_data="Siesta_server"),InlineKeyboardButton("Song", callback_data="Siesta_song"),],[InlineKeyboardButton("Speedtest", callback_data="Siesta_speed"),InlineKeyboardButton("Stats", callback_data="Siesta_stats"),InlineKeyboardButton("Assistant", callback_data="Siesta_assist"),],[InlineKeyboardButton("<<", callback_data="Siesta_music"),InlineKeyboardButton("📍 Home", callback_data="Siesta_back"),InlineKeyboardButton(">>", callback_data="Siesta_music"),],]
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Theame", callback_data="Siesta_theame"),InlineKeyboardButton("Server", callback_data="Siesta_server"),InlineKeyboardButton("Song", callback_data="Siesta_song"),],[InlineKeyboardButton("Speedtest", callback_data="Siesta_speed"),InlineKeyboardButton("Stats", callback_data="Siesta_stats"),InlineKeyboardButton("Assistant", callback_data="Siesta_assist"),],[InlineKeyboardButton("<<", callback_data="Siesta_music"),InlineKeyboardButton("📍 Home", callback_data="Siesta_"),InlineKeyboardButton(">>", callback_data="Siesta_music"),],]
             ),
         )
     elif query.data == "Siesta_back":
