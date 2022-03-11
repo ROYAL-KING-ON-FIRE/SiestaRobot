@@ -345,7 +345,7 @@ def help_button(update, context):
         pass
 
 @run_async
-def noi_about_callback(update, context):
+def Siesta_about_callback(update, context):
     query = update.callback_query
     if query.data == "Siesta_":
         query.message.edit_text(
