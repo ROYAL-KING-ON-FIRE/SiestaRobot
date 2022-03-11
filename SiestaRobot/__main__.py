@@ -886,7 +886,7 @@ def main():
     )
 
     about_callback_handler = CallbackQueryHandler(
-        siesta_about_callback, pattern=r"siesta_", run_async=True
+        Siesta_about_callback, pattern=r"Siesta_", run_async=True
     )
 
     source_callback_handler = CallbackQueryHandler(
