@@ -360,7 +360,7 @@ def Siesta_about_callback(update, context):
             text= "❍ Hey this is my music commands you can use in your group. \n\n❍ **POWERD BY NOINOI MUSIC**",
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="Siesta_musics"),InlineKeyboardButton("Join", callback_data="Siesta_join"),InlineKeyboardButton("Auth", callback_data="Siesta_auth"),],[InlineKeyboardButton("Blacklist", callback_data="Siesta_blacklist"),InlineKeyboardButton("Ping", callback_data="Siesta_ping"),InlineKeyboardButton("Lyrics", callback_data="Siesta_lyrics"),],[InlineKeyboardButton("<<", callback_data="Siesta_next"),InlineKeyboardButton("📍 Home", callback_data="Siesta_back"),InlineKeyboardButton(">>", callback_data="Siesta_next"),],]
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="Siesta_musics"),InlineKeyboardButton("Join", callback_data="Siesta_join"),InlineKeyboardButton("Auth", callback_data="Siesta_auth"),],[InlineKeyboardButton("Blacklist", callback_data="Siesta_blacklist"),InlineKeyboardButton("Ping", callback_data="Siesta_ping"),InlineKeyboardButton("Lyrics", callback_data="Siesta_lyrics"),],]
             ),
         )
         
@@ -372,7 +372,7 @@ def Siesta_about_callback(update, context):
             
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Theame", callback_data="Siesta_theame"),InlineKeyboardButton("Server", callback_data="Siesta_server"),InlineKeyboardButton("Song", callback_data="Siesta_song"),],[InlineKeyboardButton("Speedtest", callback_data="Siesta_speed"),InlineKeyboardButton("Stats", callback_data="Siesta_stats"),InlineKeyboardButton("Assistant", callback_data="Siesta_assist"),],[InlineKeyboardButton("<<", callback_data="Siesta_music"),InlineKeyboardButton("📍 Home", callback_data="Siesta_"),InlineKeyboardButton(">>", callback_data="Siesta_music"),],]
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Theame", callback_data="Siesta_theame"),InlineKeyboardButton("Server", callback_data="Siesta_server"),InlineKeyboardButton("Song", callback_data="Siesta_song"),],[InlineKeyboardButton("Speedtest", callback_data="Siesta_speed"),InlineKeyboardButton("Stats", callback_data="Siesta_stats"),InlineKeyboardButton("Assistant", callback_data="Siesta_assist"),],[InlineKeyboardButton("📍 Home", callback_data="Siesta_"),],]
             ),
         )
     elif query.data == "Siesta_back":
@@ -392,7 +392,7 @@ def Siesta_about_callback(update, context):
             
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="siesta_musics"),InlineKeyboardButton("Join", callback_data="Siesta_join"),InlineKeyboardButton("Auth", callback_data="Siesta_auth"),],[InlineKeyboardButton("Blacklist", callback_data="Siesta_blacklist"),InlineKeyboardButton("Ping", callback_data="Siesta_ping"),InlineKeyboardButton("Lyrics", callback_data="Siesta_lyrics"),],[InlineKeyboardButton("<<", callback_data="Siesta_next"),InlineKeyboardButton("↪ Back", callback_data="siesta_"),InlineKeyboardButton(">>", callback_data="Siesta_next"),],]
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="siesta_musics"),InlineKeyboardButton("Join", callback_data="Siesta_join"),InlineKeyboardButton("Auth", callback_data="Siesta_auth"),],[InlineKeyboardButton("Blacklist", callback_data="Siesta_blacklist"),InlineKeyboardButton("Ping", callback_data="Siesta_ping"),InlineKeyboardButton("Lyrics", callback_data="Siesta_lyrics"),],[InlineKeyboardButton("<<", callback_data="Siesta_next"),InlineKeyboardButton("↪ Back", callback_data="siesta_"),],]
             ),
         )
     elif query.data == "Siesta_musics":
@@ -409,7 +409,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         ) 
     elif query.data == "Siesta_join":
@@ -422,7 +422,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         ) 
     elif query.data == "Siesta_auth":
@@ -435,7 +435,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         ) 
     elif query.data == "Siesta_blacklist":
@@ -448,7 +448,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         ) 
     elif query.data == "Siesta_ping":
@@ -459,7 +459,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         ) 
     elif query.data == "Siesta_lyrics":
@@ -470,7 +470,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_music"), ]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"), ]]
             ),
         )
     elif query.data == "Siesta_theame":
@@ -482,7 +482,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_server":
@@ -499,7 +499,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_song":
@@ -510,7 +510,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_speed":
@@ -521,7 +521,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_stats":
@@ -532,7 +532,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_assist":
@@ -544,7 +544,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="Siesta_next"),]]
+                [[InlineKeyboardButton(text="↪ Back", callback_data="help_back"),]]
             ),
         )
     elif query.data == "Siesta_about":
@@ -558,7 +558,7 @@ def Siesta_about_callback(update, context):
             parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup(
                 [[InlineKeyboardButton(text="NoiSiesta's repo 📂", url="https://github.com/hyko-xd/SiestaSiestarobot"),],
-                 [InlineKeyboardButton(text="Back", callback_data="Siesta_"),]]
+                 [InlineKeyboardButton(text="Back", callback_data="help_back"),]]
             ),
         )
 @run_async
