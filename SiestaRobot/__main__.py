@@ -87,7 +87,7 @@ PM_START_TEXT = """
 buttons = [
     [
         InlineKeyboardButton(text="✨ Uᴘᴅᴀᴛᴇ", url="https://t.me/BAZIGARXD"),
-        InlineKeyboardButton(text=" ᴀʙᴏᴜᴛ", callback_data="noi_about"),
+        InlineKeyboardButton(text=" ᴀʙᴏᴜᴛ", callback_data="Siesta_about"),
         InlineKeyboardButton(text="📣 Uᴘᴅᴀᴛᴇ", url="https://t.me/CFC_BOT_SUPPORT"),
 
     ],
