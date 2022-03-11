@@ -608,7 +608,7 @@ def get_help(update: Update, context: CallbackContext):
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                     InlineKeyboardButton(text=" Menu ⚙", callback_data="noi_"),
+                     InlineKeyboardButton(text=" Menu ⚙", callback_data="Siesta_"),
                  ],
                 ]
             ),
@@ -852,7 +852,7 @@ def main():
     settings_handler = CommandHandler("settings", get_settings)
     settings_callback_handler = CallbackQueryHandler(settings_button, pattern=r"stngs_")
 
-    about_callback_handler = CallbackQueryHandler(noi_about_callback, pattern=r"noi_")
+    about_callback_handler = CallbackQueryHandler(Siesta_about_callback, pattern=r"Siesta_")
     source_callback_handler = CallbackQueryHandler(Source_about_callback, pattern=r"source_")
 
     donate_handler = CommandHandler("donate", donate)
