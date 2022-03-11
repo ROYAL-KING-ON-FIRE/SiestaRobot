@@ -1,9 +1,16 @@
+import html
+import os
+import json
 import importlib
 import time
 import re
+import sys
+import traceback
+import SiestaRobot.modules.sql.users_sql as sql
 from sys import argv
 from typing import Optional
-
+from telegram import __version__ as peler
+from platform import python_version as memek
 from SiestaRobot import (
     ALLOW_EXCL,
     CERT_PATH,
@@ -23,13 +30,11 @@ from SiestaRobot import (
     updater,
 )
 
-## ALL PLUGINS IS NOT WORABLE 10% PLUGINS ARE NOT WORKING Siesta BOT IS UP TO DATE.
-
-from pyrogram import Client, filters
+# needed to dynamically load modules
+# NOTE: Module order is not guaranteed, specify that in the config file!
 from SiestaRobot.modules import ALL_MODULES
 from SiestaRobot.modules.helper_funcs.chat_status import is_user_admin
 from SiestaRobot.modules.helper_funcs.misc import paginate_modules
-from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.error import (
     BadRequest,
@@ -76,45 +81,38 @@ def get_readable_time(seconds: int) -> str:
 
 
 PM_START_TEXT = """
-**ɪ ᴀᴍ ɴᴏɪɴᴏɪ🌸🤖** [ㅤ](https://telegra.ph/file/a439299736dc1fe3928e3.jpg)
-️➖➖➖➖➖➖➖➖➖➖➖➖➖
-**sᴜᴘᴇʀғᴀsᴛ ᴍᴜsɪᴄ ᴘʟᴀʏᴇʀ 🌸. ғᴇᴇʟ ғʀᴇᴇ ᴛᴏ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘs!!**
-️➖➖➖➖➖➖➖➖➖➖➖➖➖
-☉ **ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ғᴏʀ ᴍᴏʀᴇ.**
+*𝙷𝙴𝙻𝙻𝙾  {} !*
+✪ 𝙸'𝙼 𝙰𝙽 𝙰𝙽𝙸𝙼𝙴 𝚃𝙷𝙴𝙼𝙴 𝙼𝙰𝙽𝙰𝙶𝙴𝙼𝙴𝙽𝚃 𝙱𝙾𝚃 [✨](https://te.legra.ph/file/eae79198d81cb601b64a0.jpg)
+──────────────────────
+× *𝚄𝙿𝚃𝙸𝙼𝙴 ✘* `{}`
+× `{}` *𝚄𝚂𝙴𝚁𝚂, 𝙰𝙲𝚁𝙾𝚂𝚂* `{}` *𝙲𝙷𝙰𝚃𝚂*
+──────────────────────
+✪ 𝙷𝙸𝚃 𝙷𝙴𝙻𝙿 𝚃𝙾 𝚂𝙴𝙴 𝙼𝚈 𝙰𝚅𝙰𝙸𝙻𝙰𝙱𝙻𝙴 𝙲𝙾𝙼𝙼𝙰𝙽𝙳𝚂
 """
 
 buttons = [
     [
-        InlineKeyboardButton(text="✨ Uᴘᴅᴀᴛᴇ", url="https://t.me/BAZIGARXD"),
-        InlineKeyboardButton(text=" ᴀʙᴏᴜᴛ", callback_data="oi_about"),
-        InlineKeyboardButton(text="📣 Uᴘᴅᴀᴛᴇ", url="https://t.me/CFC_BOT_SUPPORT"),
-
+        InlineKeyboardButton(text="✨𝐀ʙᴏᴜᴛ 𝐕ᴇɴᴏᴍ 𝐑ᴏʙᴏᴛ✨", callback_data="siesta_"),
     ],
     [
-        InlineKeyboardButton(text="❓ Cᴏᴍᴍᴀɴᴅꜱ", callback_data="help_back"),
+        InlineKeyboardButton(text="📣𝐇ᴇʟᴘ", callback_data="help_back"),
         InlineKeyboardButton(
-            text="📍 Mᴜꜱɪᴄ", callback_data="noi_"
+            text="💫𝐈ɴʟɪɴᴇ​​", switch_inline_query_current_chat=""
         ),
     ],
     [
-        
-        InlineKeyboardButton(text="Aᴅᴅ ᴍᴇ ᴛᴏ ɢʀᴏᴜᴘ ✨", url="http://t.me/Siesta_BOT?startgroup=true"),
+        InlineKeyboardButton(
+            text="🗯️𝐀ᴅᴅ 𝐕ᴇɴᴏᴍ 𝐓ᴏ 𝐘ᴏᴜʀ 𝐆ʀᴏᴜᴘ", url="t.me/GOD_VENOM_ROBOT?startgroup=new"),
     ],
 ]
 
 
 HELP_STRINGS = """
-**Main commands:**  [ㅤ](https://telegra.ph/file/a439299736dc1fe3928e3.jpg)
-❂ /start: sᴛᴀʀᴛ ᴍᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴘʀᴏʙᴀʙʟʏ ᴀʟʀᴇᴀᴅʏ ᴜsᴇᴅ ᴛʜɪs..
-❂ /help: sᴇɴᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ɪ ᴡɪʟʟ ᴛᴇʟʟ ᴍᴏʀᴇ ᴀʙᴏᴜᴛ ᴍʏsᴇʟғ.
+✪ [𝙲𝙻𝙸𝙲𝙺](https://te.legra.ph/file/eae79198d81cb601b64a0.jpg) 𝙾𝙽 𝚃𝙷𝙴 𝙱𝚄𝚃𝚃𝙾𝙽 𝙱𝙴𝙻𝙻𝙾𝚆 𝚃𝙾 𝙶𝙴𝚃 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽 𝙰𝙱𝙾𝚄𝚃 𝚂𝙿𝙴𝙲𝙸𝙵𝙸𝙲𝚂 𝙲𝙾𝙼𝙼𝙰𝙽𝙳"""
 
-ᴀʟʟ ᴄᴏᴍᴍᴀɴᴅs ᴄᴀɴ ᴇɪᴛʜᴇʀ ʙᴇ ᴜsᴇᴅ ᴇɪᴛʜᴇʀ / ᴏʀ  ! ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇᴘᴏʀᴛ ᴀɴʏ ʙᴜɢs ᴏʀ ɴᴇᴇᴅ ʜᴇʟᴘ ᴡɪᴛʜ sᴇᴛᴛɪɴɢ ᴜᴘ ʀᴇᴀᴄʜ ᴜs ᴀᴛ ʜᴇᴀʀ"""
+EMI_IMG = "https://te.legra.ph/file/eae79198d81cb601b64a0.jpg"
 
-
-
-DONATE_STRING = """ʜᴇʜᴇ ʏᴏᴜ ᴄᴀɴ ᴅᴏɴᴇᴛ ғʀᴏᴍ ʜᴇᴀʀ!
- [Siesta](https://t.me/BAZIGARXD) ❤️
-"""
+DONATE_STRING = """ʜᴏɪɪ ᴍᴇ [ʀᴏʏᴀʟ ᴋɪɴɢ](https://t.me/BHAGAT_MAHAKAL_KA)"""
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -133,6 +131,8 @@ for module_name in ALL_MODULES:
 
     if imported_module.__mod_name__.lower() not in IMPORTED:
         IMPORTED[imported_module.__mod_name__.lower()] = imported_module
+    else:
+        raise Exception("Can't have two modules with the same name! Please change one")
 
     if hasattr(imported_module, "__help__") and imported_module.__help__:
         HELPABLE[imported_module.__mod_name__.lower()] = imported_module
@@ -173,7 +173,6 @@ def send_help(chat_id, text, keyboard=None):
     )
 
 
-@run_async
 def test(update: Update, context: CallbackContext):
     # pprint(eval(str(update)))
     # update.effective_message.reply_text("Hola tester! _I_ *have* `markdown`", parse_mode=ParseMode.MARKDOWN)
@@ -181,7 +180,6 @@ def test(update: Update, context: CallbackContext):
     print(update.effective_message)
 
 
-@run_async
 def start(update: Update, context: CallbackContext):
     args = context.args
     uptime = get_readable_time((time.time() - StartTime))
@@ -197,7 +195,7 @@ def start(update: Update, context: CallbackContext):
                     update.effective_chat.id,
                     HELPABLE[mod].__help__,
                     InlineKeyboardMarkup(
-                        [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help_back")]]
+                        [[InlineKeyboardButton(text="Go Back", callback_data="help_back")]]
                     ),
                 )
 
@@ -214,14 +212,25 @@ def start(update: Update, context: CallbackContext):
                 IMPORTED["rules"].send_rules(update, args[0], from_pm=True)
 
         else:
+            first_name = update.effective_user.first_name
             update.effective_message.reply_text(
-                PM_START_TEXT,
+                PM_START_TEXT.format(
+                    escape_markdown(first_name),
+                    escape_markdown(uptime),
+                    sql.num_users(),
+                    sql.num_chats()),                        
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.MARKDOWN,
                 timeout=60,
+                disable_web_page_preview=False,
             )
-    
-        
+    else:
+        update.effective_message.reply_text(
+            f"<b>💫𝐇ɪ 𝐈'ᴍ 𝐕ᴇɴᴏᴍ 𝐑ᴏʙᴏᴛ💫</b>\n<b>✨𝐒ᴛᴀʀᴛᴇᴅ 𝐖ᴏʀᴋɪɴɢ 𝐒ɪɴᴄᴇ✨</b> <code>{uptime}</code>",
+            parse_mode=ParseMode.HTML
+       )
+
+
 def error_handler(update, context):
     """Log the error and send a telegram message to notify the developer."""
     # Log the error before we do anything else, so we can see it even if something breaks.
@@ -280,7 +289,6 @@ def error_callback(update: Update, context: CallbackContext):
         # handle all other telegram related errors
 
 
-@run_async
 def help_button(update, context):
     query = update.callback_query
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
@@ -304,7 +312,7 @@ def help_button(update, context):
                 parse_mode=ParseMode.MARKDOWN,
                 disable_web_page_preview=True,
                 reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help_back")]]
+                    [[InlineKeyboardButton(text="Go Back", callback_data="help_back")]]
                 ),
             )
 
@@ -344,241 +352,165 @@ def help_button(update, context):
     except BadRequest:
         pass
 
-@run_async
-def noi_about_callback(update, context):
+
+def siesta_about_callback(update, context):
     query = update.callback_query
-    if query.data == "noi_":
+    if query.data == "siesta_":
         query.message.edit_text(
-            text= "❍ Hey this is my music commands you can use in your group. \n\n❍ **POWERD BY Siesta MUSIC**",
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="noi_musics"),InlineKeyboardButton("Join", callback_data="noi_join"),InlineKeyboardButton("Auth", callback_data="noi_auth"),],[InlineKeyboardButton("Blacklist", callback_data="noi_blacklist"),InlineKeyboardButton("Ping", callback_data="noi_ping"),InlineKeyboardButton("Lyrics", callback_data="noi_lyrics"),],[InlineKeyboardButton("<<", callback_data="noi_next"),InlineKeyboardButton("📍 Home", callback_data="noi_back"),InlineKeyboardButton(">>", callback_data="noi_next"),],]
-            ),
-        )
-        
-    elif query.data == "noi_next":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ Hey this feature has many commands, & this feature is knnown as music command.\n❍ this feature is also help you to manage your group \n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Theame", callback_data="noi_theame"),InlineKeyboardButton("Server", callback_data="noi_server"),InlineKeyboardButton("Song", callback_data="noi_song"),],[InlineKeyboardButton("Speedtest", callback_data="noi_speed"),InlineKeyboardButton("Stats", callback_data="noi_stats"),InlineKeyboardButton("Assistant", callback_data="noi_assist"),],[InlineKeyboardButton("<<", callback_data="noi_music"),InlineKeyboardButton("📍 Home", callback_data="noi_back"),InlineKeyboardButton(">>", callback_data="noi_music"),],]
-            ),
-        )
-    elif query.data == "noi_back":
-        query.message.edit_text(
-                PM_START_TEXT,
-                reply_markup=InlineKeyboardMarkup(buttons),
-                parse_mode=ParseMode.MARKDOWN,
-                timeout=60,
-                disable_web_page_preview=False,
-        )
-        
-    elif query.data == "noi_music":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ Hey this feature has many commands, & this feature is knnown as music command.\n❍ this feature is also help you to manage your group \n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Music", callback_data="noi_musics"),InlineKeyboardButton("Join", callback_data="noi_join"),InlineKeyboardButton("Auth", callback_data="noi_auth"),],[InlineKeyboardButton("Blacklist", callback_data="noi_blacklist"),InlineKeyboardButton("Ping", callback_data="noi_ping"),InlineKeyboardButton("Lyrics", callback_data="noi_lyrics"),],[InlineKeyboardButton("<<", callback_data="noi_next"),InlineKeyboardButton("↪ Back", callback_data="noi_"),InlineKeyboardButton(">>", callback_data="noi_next"),],]
-            ),
-        )
-    elif query.data == "noi_musics":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /play : for play music on voice chat."
-            f"\n\n❍ /pause : for pause music on voice chat."
-            f"\n\n❍ /resume : for resume music on voice chat."
-            f"\n\n❍ /skip : for skip music on voice chat."
-            f"\n\n❍ /mute : for mute music on voice chat."
-            f"\n\n❍ /unmute : unmute play music on voice chat."
-            f"\n\n❍ /end : for end music on voice chat.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"),]]
-            ),
-        ) 
-    elif query.data == "noi_join":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /join : for join the voice chat."
-            f"\n\n❍ /leave : for leave the voice chat."
-            f"\n\n❍ /leaveassistant : for leave assistant from voice chat.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"),]]
-            ),
-        ) 
-    elif query.data == "noi_auth":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /join : for join the voice chat."
-            f"\n\n❍ /leave : for leave the voice chat."
-            f"\n\n❍ /leaveassistant : for leave assistant from voice chat.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"),]]
-            ),
-        ) 
-    elif query.data == "noi_blacklist":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /chatbl : for blacklist any chat."
-            f"\n\n❍ /charwl : for remove blacklist chats."
-            f"\n\n❍ /blchats : for cheak black list chats.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"),]]
-            ),
-        ) 
-    elif query.data == "noi_ping":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /ping : for cheak bot working or dead.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"),]]
-            ),
-        ) 
-    elif query.data == "noi_lyrics":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /lyrics : for get song lyrics.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_music"), ]]
-            ),
-        )
-    elif query.data == "noi_theame":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /theme : - Set a theme for thumbnails"
-            f"\n\n❍ /settheame : - Set a theme for thumbnails.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_server":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /logs : 100 logs line"
-            f"\n\n❍ /vars : config vars from heroku"
-            f"\n\n❍ /delvars : del any vars or env"
-            f"\n\n❍ /setvars : set any var or update"
-            f"\n\n❍ /usage : get dyno usage"
-            f"\n\n❍ /update : update your bot"
-            f"\n\n❍ /restart : restart your bot.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_song":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /song : - for download song.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_speed":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /speedtest : - for cheak speed of bot.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_stats":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /stats : - for cheak stats of bot.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_assist":
-        query.message.edit_text(
-            text=f"**──𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗖𝗢𝗠𝗠𝗔𝗡𝗗𝗦 📚──**"
-            f"\n\n❍ /setassistant : - for set the bot assistant."
-            f"\n\n❍ /changeassistant : - for change the bot assistant.\n\n 🌸 𝗣𝗢𝗪𝗘𝗗 𝗕𝗬 𝗡𝗢𝗜𝗡𝗢𝗜 𝗠𝗨𝗦𝗜𝗖 𝗣𝗟𝗔𝗬𝗘𝗥",
-            
-            parse_mode=ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="↪ Back", callback_data="noi_next"),]]
-            ),
-        )
-    elif query.data == "noi_about":
-        query.message.edit_text(
-            text=f" 🧩 Hear the Siesta page."
-            f"\n\n❍ Hey welcome hear to Siesta's private page we are saying big thanks to you for using our bot."
-            f"\n\n❍ Our bot is superfast with smooth music player with advance new featurs"
-            f"\n\n❍ We remove no need space up plugins & Siesta is now is stable and easily deploy in 2 min."
-            f"\n\n❍ Today i am sharing the source code of this bot with"
-            f"\n\n 💡 Powerd by @BAZIGARXD",
-            parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="Siesta's repo 📂", url="https://github.com/hyko-xd/SiestaRobot"),],
-                 [InlineKeyboardButton(text="Back", callback_data="noi_back"),]]
-            ),
-        )
-@run_async
-def Source_about_callback(update, context):
-    query = update.callback_query
-    if query.data == "source_":
-        query.message.edit_text(
-            text=""" Hi.. ɪ'ᴀᴍ Siesta*
-                 \nHere is the [sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ](https://github.com/hyko-xd/SiestaRobot) .""",
+            text="๏ 𝙸'𝙼 *𝚅𝙴𝙽𝙾𝙼*, 𝙰 𝙿𝙾𝚆𝙴𝚁𝙵𝚄𝙻𝙻 𝙶𝚁𝙾𝚄𝙿 𝙼𝙰𝙽𝙰𝙶𝙴𝙼𝙴𝙽𝚃 𝙱𝙾𝚃 𝙱𝚄𝙸𝙻𝚃 𝚃𝙾 𝙷𝙴𝙻𝙿 𝚈𝙾𝚄 𝙼𝙰𝙽𝙰𝙶𝙴 𝚈𝙾𝚄𝚁 𝙶𝚁𝙾𝚄𝙿 𝙴𝙰𝚂𝙸𝙻𝚈"
+            "\n• 𝙸 𝙲𝙰𝙽 𝚁𝙴𝚂𝚃𝚁𝙸𝙲𝚃 𝚄𝚂𝙴𝚁𝚂"
+            "\n• 𝙸 𝙲𝙰𝙽 𝙶𝚁𝙴𝙴𝚃 𝚄𝚂𝙴𝚁𝚂 𝚆𝙸𝚃𝙷 𝙲𝚄𝚂𝚃𝙾𝙼𝙸𝚉𝙰𝙱𝙻𝙴 𝚆𝙴𝙻𝙲𝙾𝙼𝙴 𝙼𝙴𝚂𝚂𝙰𝙶𝙴𝚂 𝙰𝙽𝙳 𝙴𝚅𝙴𝙽 𝚂𝙴𝚃 𝙰 𝙶𝚁𝙾𝚄𝙿'𝚂 𝚁𝚄𝙻𝙴𝚂"
+            "\n• 𝙸 𝙷𝙰𝚅𝙴 𝙰𝙽 𝙰𝙳𝚅𝙰𝙽𝙲𝙴𝙳 𝙰𝙽𝚃𝙸 𝙵𝙻𝙾𝙾𝙳 𝚂𝚈𝚂𝚃𝙴𝙼"
+            "\n• 𝙸 𝙲𝙰𝙽 𝚆𝙰𝚁𝙽 𝚄𝚂𝙴𝚁𝚂 𝚄𝙽𝚃𝙸𝙻 𝚃𝙷𝙴𝚈 𝚁𝙴𝙰𝙲𝙷 𝙼𝙰𝚇 𝚆𝙰𝚁𝙽𝚂 𝚆𝙸𝚃𝙷 𝙴𝙰𝙲𝙷 𝙿𝚁𝙴𝙳𝙴𝙵𝙸𝙽𝙴𝙳 𝙰𝙲𝚃𝙸𝙾𝙽𝚂 𝚂𝚄𝙲𝙷 𝙰𝚂 𝙱𝙰𝙽, 𝙼𝚄𝚃𝙴, 𝙺𝙸𝙲𝙺, 𝙴𝚃𝙲."
+            "\n• 𝙸 𝙷𝙰𝚅𝙴 𝙰 𝙽𝙾𝚃𝙴 𝙺𝙴𝙴𝙿𝙸𝙽𝙶 𝚂𝚈𝚂𝚃𝙴𝙼, 𝙱𝙰𝙲𝙺𝙻𝙸𝚂𝚃, 𝙰𝙽𝙳 𝙴𝚅𝙴𝙽 𝙿𝚁𝙴𝙳𝙴𝚃𝙴𝚁𝙼𝙸𝙽𝙴𝙳 𝚁𝙴𝙿𝙻𝙸𝙴𝚂 𝙾𝙽 𝙲𝙴𝚁𝚃𝙰𝙸𝙽 𝙺𝙴𝚈𝚆𝙾𝚁𝙳𝚂."
+            "\n• 𝙸 𝙲𝙷𝙴𝙲𝙺 𝙵𝙾𝚁 𝙰𝙳𝙼𝙸𝙽𝚂' 𝙿𝙴𝚁𝙼𝙸𝚂𝚂𝙾𝙽 𝙱𝙴𝙵𝙾𝚁𝙴 𝙴𝚇𝙴𝙲𝚄𝚃𝙸𝙽𝙶 𝙰𝙽𝙳 𝙲𝙾𝙼𝙼𝙰𝙽𝙳 𝙰𝙽𝙳 𝙼𝙾𝚁𝙴𝚂𝚃𝚄𝙵𝙵𝚂"
+            "\n\n_𝚅𝙴𝙽𝙾𝙼'𝚂 𝙻𝙸𝙲𝙴𝙽𝚂𝙴𝚂 𝚄𝙽𝙳𝙴𝚁 𝚃𝙷𝙴 𝙶𝙽𝚄 𝙶𝙴𝙽𝙴𝚁𝙰𝙻 𝙿𝚄𝙱𝙻𝙸𝙲 𝙻𝙸𝙲𝙴𝙽𝚂𝙴𝙳 𝚅3.0_"
+            "\n\n 𝙲𝙻𝙸𝙲𝙺 𝙾𝙽 𝙱𝚄𝚃𝚃𝙾𝙽 𝙱𝙴𝙻𝙻𝙾𝚆 𝚃𝙾 𝙶𝙴𝚃 𝙱𝙰𝚂𝙸𝙲 𝙷𝙴𝙻𝙿 𝙵𝙾𝚁 𝚅𝙴𝙽𝙾𝙼 𝚁𝙾𝙱𝙾𝚃",
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(
                 [
                  [
-                    InlineKeyboardButton(text="Updates 📍", url="https://t.me/bazigarxd")
+                    InlineKeyboardButton(text="ᴀᴅᴍɪɴs", callback_data="siesta_admin"),
+                    InlineKeyboardButton(text="ɴᴏᴛᴇs", callback_data="siesta_notes"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", callback_data="siesta_support"),
+                    InlineKeyboardButton(text="ᴄʀᴇᴅɪᴛs", callback_data="siesta_credit"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="ᴏᴡɴᴇʀ", url="https://t.me/BHAGAT_MAHAKAL_KA"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="ɢᴏ ʙᴀᴄᴋ", callback_data="siesta_back"),
                  ]
                 ]
             ),
         )
-    elif query.data == "source_back":
+    elif query.data == "siesta_back":
+        first_name = update.effective_user.first_name
+        uptime = get_readable_time((time.time() - StartTime))
         query.message.edit_text(
-                PM_START_TEXT,
+                PM_START_TEXT.format(
+                    escape_markdown(first_name),
+                    escape_markdown(uptime),
+                    sql.num_users(),
+                    sql.num_chats()),
                 reply_markup=InlineKeyboardMarkup(buttons),
                 parse_mode=ParseMode.MARKDOWN,
                 timeout=60,
                 disable_web_page_preview=False,
         )
-@run_async
+
+    elif query.data == "siesta_admin":
+        query.message.edit_text(
+            text=f"*๏ Let's make your group bit effective now*"
+            "\nCongragulations, Venom Robot now ready to manage your group."
+            "\n\n*Admin Tools*"
+            "\nBasic Admin tools help you to protect and powerup your group."
+            "\nYou can ban members, Kick members, Promote someone as admin through commands of bot."
+            "\n\n*Greetings*"
+            "\nLets set a welcome message to welcome new users coming to your group."
+            "\nsend `/setwelcome [message]` to set a welcome message!",
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text="Go Back", callback_data="siesta_")]]
+            ),
+        )
+
+    elif query.data == "siesta_notes":
+        query.message.edit_text(
+            text=f"<b>๏ Setting up notes</b>"
+            f"\nYou can save message/media/audio or anything as notes"
+            f"\nto get a note simply use # at the beginning of a word"
+            f"\n\nYou can also set buttons for notes and filters (refer help menu)",
+            parse_mode=ParseMode.HTML,
+            reply_markup=InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="siesta_")]]
+            ),
+        )
+    elif query.data == "siesta_support":
+        query.message.edit_text(
+            text="*๏ ᴠᴇɴᴏᴍ sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛs*"
+            "\nJoin My Support Group/Channel for see or report a problem on Siesta.",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                 [
+                    InlineKeyboardButton(text="sᴜᴘᴘᴏʀᴛ", url="https://t.me/DARKAMANSUPPORT"),
+                    InlineKeyboardButton(text="ᴜᴘᴅᴀᴛᴇs", url="https://t.me/DARKAMANCHANNEL"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="ɢᴏ ʙᴀᴄᴋ", callback_data="siesta_"),
+                 
+                 ]
+                ]
+            ),
+        )
+
+
+    elif query.data == "siesta_credit":
+        query.message.edit_text(
+            text=f"๏ Credis for Siesta\n"
+            "\nHere Developers Making And Give Inspiration For Made The Siesta Robot",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                 [
+                    InlineKeyboardButton(text="ᴠᴀɪɴ", url="https://github.com/shiinobu"),
+                    InlineKeyboardButton(text="sᴇɴᴀ-ᴇx", url="https://github.com/kennedy-ex"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="ᴘᴀᴜʟ ʟᴀʀsᴇɴ", url="https://github.com/PaulSonOfLars"),
+                    InlineKeyboardButton(text="ᴛʜᴇ ʜᴀᴍᴋᴇʀ ᴄᴀᴛ", url="https://github.com/TheHamkerCat"),
+                 ],
+                 [
+                    InlineKeyboardButton(text="ɢᴏ ʙᴀᴄᴋ", callback_data="siesta_"),
+                 ]
+                ]
+            ),
+        )
+
+def Source_about_callback(update, context):
+    query = update.callback_query
+    if query.data == "source_":
+        query.message.edit_text(
+            text="๏›› This advance command for Musicplayer."
+            "\n\n๏ Command for admins only."
+            "\n • `/reload` - For refreshing the adminlist."
+            "\n • `/pause` - To pause the playback."
+            "\n • `/resume` - To resuming the playback You've paused."
+            "\n • `/skip` - To skipping the player."
+            "\n • `/end` - For end the playback."
+            "\n • `/musicplayer <on/off>` - Toggle for turn ON or turn OFF the musicplayer."
+            "\n\n๏ Command for all members."
+            "\n • `/play` <query /reply audio> - Playing music via YouTube."
+            "\n • `/playlist` - To playing a playlist of groups or your personal playlist",
+            parse_mode=ParseMode.MARKDOWN,
+            disable_web_page_preview=True,
+            reply_markup=InlineKeyboardMarkup(
+                [
+                 [
+                    InlineKeyboardButton(text="ɢᴏ ʙᴀᴄᴋ", callback_data="siesta_")
+                 ]
+                ]
+            ),
+        )
+    elif query.data == "source_back":
+        first_name = update.effective_user.first_name
+        query.message.edit_text(
+                PM_START_TEXT.format(
+                    escape_markdown(first_name),
+                    escape_markdown(uptime),
+                    sql.num_users(),
+                    sql.num_chats()),
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.MARKDOWN,
+                timeout=60,
+                disable_web_page_preview=False,
+        )
+
 def get_help(update: Update, context: CallbackContext):
     chat = update.effective_chat  # type: Optional[Chat]
     args = update.effective_message.text.split(None, 1)
@@ -604,20 +536,24 @@ def get_help(update: Update, context: CallbackContext):
             )
             return
         update.effective_message.reply_text(
-            "💡 Hear all Siesta commands menu is opend you can cheak the following menu bar click on buttons.",
+            "𝙲𝙾𝙽𝚃𝙰𝙲𝚃 𝙼𝙴 𝙸𝙽 𝙿𝙼 𝚃𝙾 𝙶𝙴𝚃 𝚃𝙷𝙴𝙴 𝙻𝙸𝚂𝚃 𝙾𝙵 𝙿𝙾𝚂𝚂𝙸𝙱𝙻𝙴 𝙲𝙾𝙼𝙼𝙰𝙽𝙳𝚂",
             reply_markup=InlineKeyboardMarkup(
                 [
                     [
-                     InlineKeyboardButton(text=" Menu ⚙", callback_data="noi_"),
-                 ],
+                        InlineKeyboardButton(
+                            text="Help",
+                            url="t.me/{}?start=help".format(context.bot.username),
+                        )
+                    ]
                 ]
             ),
         )
         return
+
     elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
         module = args[1].lower()
         text = (
-            "Here is the available help for the *{}* module:\n".format(
+            "𝙷𝙴𝚁𝙴 𝙸𝚂 𝚃𝙷𝙴𝙴 𝙰𝚅𝙰𝙸𝙻𝙰𝙱𝙻𝙴 𝙷𝙴𝙻𝙿 𝙵𝙾𝚁 𝚃𝙷𝙴 *{}* 𝙼𝙾𝙳𝚄𝙻𝙴 ☞︎︎︎\n".format(
                 HELPABLE[module].__mod_name__
             )
             + HELPABLE[module].__help__
@@ -626,12 +562,13 @@ def get_help(update: Update, context: CallbackContext):
             chat.id,
             text,
             InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="ʙᴀᴄᴋ", callback_data="help_back")]]
+                [[InlineKeyboardButton(text="Go Back", callback_data="help_back")]]
             ),
         )
 
     else:
         send_help(chat.id, HELP_STRINGS)
+
 
 def send_settings(chat_id, user_id, user=False):
     if user:
@@ -649,9 +586,10 @@ def send_settings(chat_id, user_id, user=False):
         else:
             dispatcher.bot.send_message(
                 user_id,
-                "Sepertinya tidak ada pengaturan khusus pengguna yang tersedia :'(",
+                "Seems like there aren't any user specific settings available :'(",
                 parse_mode=ParseMode.MARKDOWN,
             )
+
     else:
         if CHAT_SETTINGS:
             chat_name = dispatcher.bot.getChat(chat_id).title
@@ -671,7 +609,8 @@ def send_settings(chat_id, user_id, user=False):
                 "in a group chat you're admin in to find its current settings!",
                 parse_mode=ParseMode.MARKDOWN,
             )
-@run_async
+
+
 def settings_button(update: Update, context: CallbackContext):
     query = update.callback_query
     user = update.effective_user
@@ -685,7 +624,7 @@ def settings_button(update: Update, context: CallbackContext):
             chat_id = mod_match.group(1)
             module = mod_match.group(2)
             chat = bot.get_chat(chat_id)
-            text = "*{}* has the following settings for the *{}* module:\n\n".format(
+            text = "*{}* 𝙷𝙰𝚂 𝚃𝙷𝙴 𝙵𝙾𝙻𝙻𝙾𝚆𝙸𝙽𝙶 𝚂𝙴𝚃𝚃𝙸𝙽𝙶𝚂 𝙵𝙾𝚁 𝚃𝙷𝙴 *{}* 𝙼𝙾𝙳𝚄𝙻𝙴 ☞︎︎︎\n\n".format(
                 escape_markdown(chat.title), CHAT_SETTINGS[module].__mod_name__
             ) + CHAT_SETTINGS[module].__chat_settings__(chat_id, user.id)
             query.message.reply_text(
@@ -695,13 +634,14 @@ def settings_button(update: Update, context: CallbackContext):
                     [
                         [
                             InlineKeyboardButton(
-                                text="Back",
+                                text="Go Back",
                                 callback_data="stngs_back({})".format(chat_id),
                             )
                         ]
                     ]
                 ),
             )
+
         elif prev_match:
             chat_id = prev_match.group(1)
             curr_page = int(prev_match.group(2))
@@ -715,6 +655,7 @@ def settings_button(update: Update, context: CallbackContext):
                     )
                 ),
             )
+
         elif next_match:
             chat_id = next_match.group(1)
             next_page = int(next_match.group(2))
@@ -728,6 +669,7 @@ def settings_button(update: Update, context: CallbackContext):
                     )
                 ),
             )
+
         elif back_match:
             chat_id = back_match.group(1)
             chat = bot.get_chat(chat_id)
@@ -740,6 +682,7 @@ def settings_button(update: Update, context: CallbackContext):
                 ),
             )
 
+        # ensure no spinny white circle
         bot.answer_callback_query(query.id)
         query.message.delete()
     except BadRequest as excp:
@@ -749,12 +692,14 @@ def settings_button(update: Update, context: CallbackContext):
             "Message can't be deleted",
         ]:
             LOGGER.exception("Exception in settings buttons. %s", str(query.data))
-@run_async
+
+
 def get_settings(update: Update, context: CallbackContext):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
 
+    # ONLY send settings in PM
     if chat.type != chat.PRIVATE:
         if is_user_admin(chat, user.id):
             text = "Click here to get this chat's settings, as well as yours."
@@ -779,7 +724,7 @@ def get_settings(update: Update, context: CallbackContext):
     else:
         send_settings(chat.id, user.id, True)
 
-@run_async
+
 def donate(update: Update, context: CallbackContext):
     user = update.effective_message.from_user
     chat = update.effective_chat  # type: Optional[Chat]
@@ -789,13 +734,12 @@ def donate(update: Update, context: CallbackContext):
             DONATE_STRING, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
         )
 
-        if OWNER_ID != 1963422158 and DONATION_LINK:
+        if OWNER_ID != 945137470:
             update.effective_message.reply_text(
-                "You can also donate to the person currently running me "
-                "[here]({})".format(DONATION_LINK),
+                "I'm free for everyone ❤️ If you wanna make me smile, just join"
+                "[My Channel]({})".format(DONATION_LINK),
                 parse_mode=ParseMode.MARKDOWN,
             )
-
     else:
         try:
             bot.send_message(
@@ -812,6 +756,8 @@ def donate(update: Update, context: CallbackContext):
             update.effective_message.reply_text(
                 "Contact me in PM first to get donation information."
             )
+
+
 def migrate_chats(update: Update, context: CallbackContext):
     msg = update.effective_message  # type: Optional[Message]
     if msg.migrate_to_chat_id:
@@ -835,7 +781,14 @@ def main():
 
     if SUPPORT_CHAT is not None and isinstance(SUPPORT_CHAT, str):
         try:
-            dispatcher.bot.sendMessage(f"@{SUPPORT_CHAT}", "I Aᴍ Aʟɪᴠᴇ 🔥")
+            dispatcher.bot.sendMessage(
+                f"@{SUPPORT_CHAT}", 
+                f"""**𝚅𝙴𝙽𝙾𝙼 𝚁𝙾𝙱𝙾𝚃 𝚂𝚃𝙰𝚁𝚃𝙴𝙳 🇮🇳**
+
+**Python:** `{memek()}`
+**Telegram Library:** `v{peler}`""",
+                parse_mode=ParseMode.MARKDOWN
+            )
         except Unauthorized:
             LOGGER.warning(
                 "Bot isnt able to send message to support_chat, go and check!"
@@ -843,22 +796,33 @@ def main():
         except BadRequest as e:
             LOGGER.warning(e.message)
 
-    test_handler = CommandHandler("test", test)
-    start_handler = CommandHandler("start", start)
+    test_handler = CommandHandler("test", test, run_async=True)
+    start_handler = CommandHandler("start", start, run_async=True)
 
-    help_handler = CommandHandler("help", get_help)
-    help_callback_handler = CallbackQueryHandler(help_button, pattern=r"help_.*")
+    help_handler = CommandHandler("help", get_help, run_async=True)
+    help_callback_handler = CallbackQueryHandler(
+        help_button, pattern=r"help_.*", run_async=True
+    )
 
-    settings_handler = CommandHandler("settings", get_settings)
-    settings_callback_handler = CallbackQueryHandler(settings_button, pattern=r"stngs_")
+    settings_handler = CommandHandler("settings", get_settings, run_async=True)
+    settings_callback_handler = CallbackQueryHandler(
+        settings_button, pattern=r"stngs_", run_async=True
+    )
 
-    about_callback_handler = CallbackQueryHandler(noi_about_callback, pattern=r"noi_")
-    source_callback_handler = CallbackQueryHandler(Source_about_callback, pattern=r"source_")
+    about_callback_handler = CallbackQueryHandler(
+        siesta_about_callback, pattern=r"siesta_", run_async=True
+    )
 
-    donate_handler = CommandHandler("donate", donate)
-    migrate_handler = MessageHandler(Filters.status_update.migrate, migrate_chats)
+    source_callback_handler = CallbackQueryHandler(
+        Source_about_callback, pattern=r"source_", run_async=True
+    )
 
-    # dispatcher.add_handler(test_handler)
+    donate_handler = CommandHandler("donate", donate, run_async=True)
+    migrate_handler = MessageHandler(
+        Filters.status_update.migrate, migrate_chats, run_async=True
+    )
+
+    dispatcher.add_handler(test_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(about_callback_handler)
@@ -882,7 +846,7 @@ def main():
 
     else:
         LOGGER.info("Using long polling.")
-        updater.start_polling(timeout=15, read_latency=4, clean=True)
+        updater.start_polling(timeout=15, read_latency=4, drop_pending_updates=True)
 
     if len(argv) not in (1, 3, 4):
         telethn.disconnect()
