@@ -74,7 +74,7 @@ def get_readable_time(seconds: int) -> str:
 
     return ping_time
 
-SiestaRobot_IMG = "https://telegra.ph/file/a439299736dc1fe3928e3.jpg"
+
 
 PM_START_TEXT = """
 **ɪ ᴀᴍ ɴᴏɪɴᴏɪ🌸🤖** [ㅤ](https://telegra.ph/file/a439299736dc1fe3928e3.jpg)
@@ -221,17 +221,7 @@ def start(update: Update, context: CallbackContext):
                 parse_mode=ParseMode.MARKDOWN,
                 timeout=60,
             )
-    else:
-        update.effective_message.reply_photo(
-            SiestaRobot_IMG, caption= "I a'm alive 📍 \n<b>I cant sleep.:</b> <code>{}</code>".format(
-                uptime
-            ),
-            parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton(text="Sᴜᴘᴘᴏʀᴛ", url="https://t.me/CFC_BOT_SUPPORT")]]
-            ),
-        )
-        
+    
 def error_handler(update, context):
     """Log the error and send a telegram message to notify the developer."""
     # Log the error before we do anything else, so we can see it even if something breaks.
@@ -357,7 +347,7 @@ def help_button(update, context):
 @run_async
 def noi_about_callback(update, context):
     query = update.callback_query
-    if query.data == "noi_":
+    if query.data == "siesta_":
         query.message.edit_text(
             text= "❍ Hey this is my music commands you can use in your group. \n\n❍ **POWERD BY NOINOI MUSIC**",
             parse_mode=ParseMode.MARKDOWN,
