@@ -26,6 +26,45 @@ ERROR_MESSAGE = "Oops! An exception occurred! \n\n**Error** : {} " \
             "sensitive information and you if want to report this as " \
             "this error message is not being logged by us!"
 
+from pyrogram.types import InlineKeyboardButton
+
+
+class session:
+
+    START = """
+Hey {}
+
+Welcome to {}
+
+If you don't trust this bot, 
+1) stop reading this message
+2) delete this chat
+
+Still reading?
+You can use me to generate pyrogram and telethon string session. Use below buttons to learn more !
+    """
+
+    # Home Button
+    home_buttons = [
+        [InlineKeyboardButton("🔥 Start Generating Session 🔥", callback_data="generate")],
+        [InlineKeyboardButton(text="🏠 Return Home 🏠", callback_data="home")]
+    ]
+
+    generate_button = [
+        [InlineKeyboardButton("🔥 Start Generating Session 🔥", callback_data="generate")]
+    ]
+
+    # Rest Buttons
+    buttons = [
+        [InlineKeyboardButton("🔥 Start Generating Session 🔥", callback_data="generate")],
+        [
+            InlineKeyboardButton("How to Use ❔", callback_data="help"),
+        ],
+        [InlineKeyboardButton("♥ More Amazing bots ♥", url="https://t.me/LionXSupport")],
+    ]
+    """
+
+
 
 @pbot.on_message(filters.private & filters.incoming & filters.command("start"))
 async def start(bot, msg):
@@ -145,13 +184,15 @@ async def cancelled(msg):
         return False
 
 
-# @Client.on_message(filters.private & ~filters.forwarded & filters.command(['cancel', 'restart']))
-# async def formalities(_, msg):
-#     if "/cancel" in msg.text:
-#         await msg.reply("Cancelled all the Processes!", quote=True, reply_markup=InlineKeyboardMarkup(Data.generate_button))
-#         return True
-#     elif "/restart" in msg.text:
-#         await msg.reply("Restarted the Bot!", quote=True, reply_markup=InlineKeyboardMarkup(Data.generate_button))
-#         return True
-#     else:
-#         return False
+@Client.on_message(filters.private & ~filters.forwarded & filters.command(['cancel', 'restart']))
+async def formalities(_, msg):
+     if "/cancel" in msg.text:
+        await msg.reply("Cancelled all the Processes!", quote=True, reply_markup=InlineKeyboardMarkup(Data.generate_button))
+        return True
+     elif "/restart" in msg.text:
+        await msg.reply("Restarted the Bot!", quote=True, reply_markup=InlineKeyboardMarkup(Data.generate_button))
+        return True
+    else:
+        return False
+
+__mod_help_ = "session"
