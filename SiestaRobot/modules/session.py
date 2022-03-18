@@ -29,7 +29,7 @@ ERROR_MESSAGE = "Oops! An exception occurred! \n\n**Error** : {} " \
 from pyrogram.types import InlineKeyboardButton
 
 
-class session:
+class data:
 
     START = """
 Hey {}
@@ -195,4 +195,4 @@ async def formalities(_, msg):
     else:
         return False
 
-__mod_help_ = "session"
+__mod_help__ = "session"
