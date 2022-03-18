@@ -34,21 +34,4 @@ You can use me to generate pyrogram and telethon string session. Use below butto
         ],
         [InlineKeyboardButton("♥ More Amazing bots ♥", url="https://t.me/LionXSupport")],
     ]
-
-    # Help Message
-    HELP = """
-✨ **Available Commands** ✨
-
-/help - This Message
-/start - Start the Bot
-/generate - Start Generating Session
-/cancel - Cancel the process
-/restart - Cancel the process
-"""
-
-    # About Message
-    ABOUT = """
-**About This Bot** 
-
-A telegram bot to generate pyrogram and telethon string session
     """
